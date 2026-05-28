@@ -510,7 +510,6 @@ function closePanicModal() {
     return;
   }
   pausePanicTimer();
-  resetPanicTimer();
   setPanicDialogState(false);
   unlockBodyScroll();
   if (lastFocusedElement && document.contains(lastFocusedElement)) {
