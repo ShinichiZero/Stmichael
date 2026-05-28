@@ -633,8 +633,10 @@ function handleAudioPlay() {
   }
   el.nightAudio.play().then(() => {
     el.audioStatus.textContent = "Playing audio.";
+    announce("Playing audio");
   }).catch(() => {
     el.audioStatus.textContent = "Unable to play audio.";
+    announce("Unable to play audio");
   });
 }
 
@@ -644,6 +646,7 @@ function handleAudioPause() {
   }
   el.nightAudio.pause();
   el.audioStatus.textContent = "Audio paused.";
+  announce("Audio paused");
 }
 
 function handleAudioStop() {
@@ -653,6 +656,7 @@ function handleAudioStop() {
   el.nightAudio.pause();
   el.nightAudio.currentTime = 0;
   el.audioStatus.textContent = "Audio stopped.";
+  announce("Audio stopped");
 }
 
 function updateLateNightBanner() {
