@@ -1,0 +1,132 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f8f8f8;
+  --text: #111;
+  --accent: #194c98;
+  --danger: #9d1f25;
+  --panel: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app-header,
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.top-controls,
+.line-mode-controls,
+.counter-row,
+.prayer-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.prayer-buttons {
+  margin: 0.75rem 0;
+}
+
+.big-btn {
+  font-size: 1.1rem;
+  min-height: 3.25rem;
+  min-width: 8rem;
+  padding: 0.7rem 1rem;
+  border: 2px solid #0000;
+  border-radius: 0.7rem;
+  cursor: pointer;
+}
+
+.big-btn:focus-visible,
+.toggle-btn:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.toggle-btn {
+  min-height: 2.7rem;
+  border-radius: 0.6rem;
+  border: 1px solid #888;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+}
+
+.panic-btn {
+  background: var(--danger);
+  color: #fff;
+  width: 100%;
+}
+
+.prayer-panel,
+.chaplet-tools {
+  background: var(--panel);
+  border-radius: 0.9rem;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.prayer-line {
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+
+.all-lines p {
+  margin: 0.4rem 0;
+}
+
+output {
+  min-width: 4rem;
+  text-align: center;
+  font-size: 1.6rem;
+}
+
+.focus-mode .app-header,
+.focus-mode .controls,
+.focus-mode .chaplet-tools {
+  display: none;
+}
+
+.focus-mode .prayer-panel {
+  margin-top: 0;
+  min-height: 100vh;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.warfare-mode {
+  --bg: #090b11;
+  --text: #d9deee;
+  --accent: #9ebfff;
+  --panel: #111827;
+}
+
+.warfare-mode .panic-btn {
+  background: #5f1420;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

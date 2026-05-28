@@ -1,0 +1,11 @@
+{
+  "name": "St. Michael Defender",
+  "short_name": "StMichael",
+  "description": "Interactive prayer companion focused on St. Michael prayers",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#090b11",
+  "theme_color": "#121212",
+  "lang": "en",
+  "icons": []
+}
