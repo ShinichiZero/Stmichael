@@ -203,7 +203,8 @@ const state = {
   beads: safeBeads,
   focus: storage.get("stmichael.focus", false),
   warfare: storage.get("stmichael.warfare", false),
-  section: storage.get("stmichael.section", "prayers")
+  section: storage.get("stmichael.section", "prayers"),
+  panicOpen: false
 };
 
 const el = {
@@ -273,6 +274,7 @@ let panicRemaining = 60;
 let lastFocusedElement = null;
 let audioAvailable = false;
 let audioRequested = false;
+let scrollLockY = 0;
 
 function getCurrentPrayer() {
   const languagePack = prayers[state.language] ?? prayers.en;
@@ -290,6 +292,9 @@ function haptic() {
 }
 
 function setSection(section) {
+  if (state.section === "threeam" && section !== "threeam") {
+    pauseThreeAmBreath();
+  }
   state.section = section;
   storage.set("stmichael.section", section);
   el.sections.forEach((panel) => {
@@ -453,32 +458,65 @@ function setLanguage(language) {
 function updateBeads(value) {
   state.beads = Math.max(0, value);
   el.beadCount.textContent = String(state.beads);
+  el.decrementBtn.disabled = state.beads <= 0;
   storage.set("stmichael.beads", state.beads);
 }
 
 function updatePanicPrayer() {
-  el.panicPrayerText.textContent = prayers[state.language].panic;
+  const languagePack = prayers[state.language] ?? prayers.en;
+  el.panicPrayerText.textContent = languagePack.panic;
 }
 
-function openPanicDialog() {
-  lastFocusedElement = document.activeElement;
+function setPanicDialogState(isOpen) {
+  state.panicOpen = isOpen;
+  el.dialogBackdrop.hidden = !isOpen;
+  el.panicDialog.hidden = !isOpen;
+  el.dialogBackdrop.classList.toggle("is-open", isOpen);
+  el.panicDialog.classList.toggle("is-open", isOpen);
+  el.panicDialog.setAttribute("aria-hidden", String(!isOpen));
+}
+
+function lockBodyScroll() {
+  scrollLockY = window.scrollY || window.pageYOffset;
+  document.body.style.top = `-${scrollLockY}px`;
   document.body.classList.add("dialog-open");
+}
+
+function unlockBodyScroll() {
+  document.body.classList.remove("dialog-open");
+  document.body.style.top = "";
+  window.scrollTo(0, scrollLockY);
+}
+
+function openPanicModal() {
+  if (state.panicOpen) {
+    return;
+  }
+  lastFocusedElement = document.activeElement instanceof HTMLElement
+    ? document.activeElement
+    : null;
   updatePanicPrayer();
-  el.dialogBackdrop.hidden = false;
-  el.panicDialog.hidden = false;
-  el.panicCloseBtn.focus();
+  setPanicDialogState(true);
+  lockBodyScroll();
   resetPanicTimer();
+  window.requestAnimationFrame(() => {
+    el.panicCloseBtn.focus({ preventScroll: true });
+  });
   announce("Calming panel opened");
 }
 
-function closePanicDialog() {
-  document.body.classList.remove("dialog-open");
-  el.dialogBackdrop.hidden = true;
-  el.panicDialog.hidden = true;
-  pausePanicTimer();
-  if (lastFocusedElement) {
-    lastFocusedElement.focus();
+function closePanicModal() {
+  if (!state.panicOpen) {
+    return;
   }
+  pausePanicTimer();
+  resetPanicTimer();
+  setPanicDialogState(false);
+  unlockBodyScroll();
+  if (lastFocusedElement && document.contains(lastFocusedElement)) {
+    lastFocusedElement.focus({ preventScroll: true });
+  }
+  lastFocusedElement = null;
   announce("Calming panel closed");
 }
 
@@ -680,6 +718,7 @@ function applyInitialState() {
   setWarfareMode(state.warfare);
   renderPrayer();
   updatePanicPrayer();
+  setPanicDialogState(false);
   initJournal();
   updateLateNightBanner();
   initAudio();
@@ -721,12 +760,17 @@ el.nextLineBtn.addEventListener("click", () => {
 });
 
 el.panicBtn.addEventListener("click", () => {
-  openPanicDialog();
+  openPanicModal();
   haptic();
 });
 
-el.dialogBackdrop.addEventListener("click", closePanicDialog);
-el.panicCloseBtn.addEventListener("click", closePanicDialog);
+el.dialogBackdrop.addEventListener("click", closePanicModal);
+el.panicDialog.addEventListener("click", (event) => {
+  if (event.target === el.panicDialog) {
+    closePanicModal();
+  }
+});
+el.panicCloseBtn.addEventListener("click", closePanicModal);
 
 el.panicBreathStart.addEventListener("click", () => {
   startPanicTimer();
@@ -741,7 +785,7 @@ el.panicPrayerBtn.addEventListener("click", () => {
   setPrayer("prayer");
   setFocusMode(true);
   setLineMode(true, { shouldAnnounce: false });
-  closePanicDialog();
+  closePanicModal();
 });
 
 el.incrementBtn.addEventListener("click", () => {
@@ -788,8 +832,8 @@ el.audioPause.addEventListener("click", handleAudioPause);
 el.audioStop.addEventListener("click", handleAudioStop);
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !el.panicDialog.hidden) {
-    closePanicDialog();
+  if (event.key === "Escape" && state.panicOpen) {
+    closePanicModal();
   }
 });
 

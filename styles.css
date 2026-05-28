@@ -33,6 +33,10 @@ body {
 
 body.dialog-open {
   overflow: hidden;
+  position: fixed;
+  width: 100%;
+  left: 0;
+  right: 0;
 }
 
 img,
@@ -430,6 +434,7 @@ output {
   inset: 0;
   background: rgba(5, 6, 10, 0.7);
   z-index: 30;
+  pointer-events: none;
 }
 
 .dialog {
@@ -439,6 +444,17 @@ output {
   place-items: center;
   z-index: 40;
   padding: 1.5rem;
+  pointer-events: none;
+}
+
+.dialog-backdrop.is-open,
+.dialog.is-open {
+  pointer-events: auto;
+}
+
+.dialog[hidden],
+.dialog-backdrop[hidden] {
+  display: none;
 }
 
 .dialog-card {
