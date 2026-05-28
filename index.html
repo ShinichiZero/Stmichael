@@ -3,66 +3,216 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#121212" />
+    <meta name="theme-color" content="#0b0f17" />
     <meta name="description" content="Interactive St. Michael prayer companion" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>St. Michael Defender</title>
     <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon-192.svg" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="app-header">
-      <h1>St. Michael Defender</h1>
-      <div class="top-controls">
-        <label for="languageSelect">Language</label>
-        <select id="languageSelect" aria-label="Select language">
-          <option value="en">English</option>
-          <option value="la">Latin</option>
-          <option value="it">Italian</option>
-          <option value="de">German</option>
-          <option value="ja">Japanese</option>
-        </select>
-        <button id="focusModeBtn" class="toggle-btn" aria-pressed="false">Focus mode</button>
-        <button id="warfareModeBtn" class="toggle-btn" aria-pressed="false">Spiritual warfare mode</button>
+    <a class="skip-link" href="#mainContent">Skip to content</a>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="branding">
+          <p class="app-eyebrow">St. Michael Defender</p>
+          <h1>St. Michael Defender</h1>
+          <p class="app-subtitle">Prayer, focus, and calm for late-night spiritual battles.</p>
+        </div>
+        <div class="top-controls">
+          <div class="control-group">
+            <label for="languageSelect">Language</label>
+            <select id="languageSelect" aria-label="Select language">
+              <option value="en">English</option>
+              <option value="la">Latin</option>
+              <option value="it">Italian</option>
+              <option value="de">German</option>
+              <option value="ja">Japanese</option>
+            </select>
+          </div>
+          <button id="focusModeBtn" class="btn ghost" aria-pressed="false">Focus mode</button>
+          <button id="warfareModeBtn" class="btn ghost" aria-pressed="false">Spiritual warfare mode</button>
+        </div>
+      </header>
+
+      <nav class="section-nav" aria-label="Primary">
+        <button class="nav-btn active" data-section="prayers" aria-current="page">Prayers</button>
+        <button class="nav-btn" data-section="beads">Beads</button>
+        <button class="nav-btn" data-section="panic">Panic</button>
+        <button class="nav-btn" data-section="threeam">Pray With Me at 3AM</button>
+      </nav>
+
+      <main id="mainContent">
+        <section class="section" id="section-prayers" data-section="prayers">
+          <div class="section-heading">
+            <h2>Prayer to St. Michael</h2>
+            <p>Choose a prayer, then settle into a calm rhythm.</p>
+          </div>
+          <div class="card prayer-card">
+            <div class="prayer-tabs" role="tablist" aria-label="Prayer selection">
+              <button class="tab-btn active" role="tab" data-prayer="prayer" aria-selected="true">Prayer to St. Michael</button>
+              <button class="tab-btn" role="tab" data-prayer="chaplet" aria-selected="false">Chaplet of St. Michael</button>
+              <button class="tab-btn" role="tab" data-prayer="litany" aria-selected="false">Litany</button>
+            </div>
+
+            <div class="prayer-controls">
+              <button id="lineModeBtn" class="btn ghost" aria-pressed="false">One line at a time</button>
+              <div class="line-nav" aria-label="Line navigation">
+                <button id="prevLineBtn" class="btn ghost">Previous</button>
+                <button id="nextLineBtn" class="btn primary">Next</button>
+              </div>
+              <button id="exitFocusBtn" class="btn ghost focus-exit">Exit focus mode</button>
+              <p id="lineStatus" class="line-status" aria-live="polite"></p>
+            </div>
+
+            <article class="prayer-content">
+              <h3 id="prayerTitle">Prayer to St. Michael</h3>
+              <p id="prayerLine" class="prayer-line" aria-live="polite"></p>
+              <div id="allLines" class="all-lines" aria-live="polite"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="section-beads" data-section="beads" hidden>
+          <div class="section-heading">
+            <h2>Bead Counter</h2>
+            <p>Track chaplet repetitions with calm, tactile controls.</p>
+          </div>
+          <div class="card counter-card">
+            <div class="counter-row">
+              <button id="decrementBtn" class="btn ghost" aria-label="Decrease bead counter">−</button>
+              <output id="beadCount" aria-live="polite">0</output>
+              <button id="incrementBtn" class="btn ghost" aria-label="Increase bead counter">+</button>
+            </div>
+            <div class="counter-actions">
+              <button id="resetCounterBtn" class="btn ghost">Reset beads</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="section-panic" data-section="panic" hidden>
+          <div class="section-heading">
+            <h2>Spiritual Panic Button</h2>
+            <p>For the moments when you need a calm, grounded response right away.</p>
+          </div>
+          <div class="card panic-card">
+            <p class="panic-intro">Tap for a steady prayer, breath timer, and focus mode entry.</p>
+            <button id="panicBtn" class="btn danger" aria-haspopup="dialog">Open calming panel</button>
+          </div>
+        </section>
+
+        <section class="section" id="section-threeam" data-section="threeam" hidden>
+          <div class="section-heading">
+            <h2>Pray With Me at 3AM</h2>
+            <p class="subtitle">For the nights when your mind will not stop.</p>
+          </div>
+          <div id="lateNightBanner" class="late-night" hidden>
+            It is late. Let's slow down.
+          </div>
+          <div class="card threeam-card">
+            <ol class="step-list">
+              <li>Stop scrolling.</li>
+              <li>Breathe with me.</li>
+              <li>Pray to St. Michael.</li>
+              <li>Read a short scripture.</li>
+              <li>Journal one honest sentence.</li>
+            </ol>
+
+            <div class="threeam-grid">
+              <div class="subcard breathing-card">
+                <h3>Breathing (4-4-6)</h3>
+                <div class="breathing-visual" id="threeamBreathVisual" aria-hidden="true"></div>
+                <p id="threeamBreathPhase" class="breath-phase" aria-live="polite">Ready</p>
+                <p id="threeamBreathTimer" class="breath-timer" aria-live="polite">0</p>
+                <div class="control-row">
+                  <button id="threeamBreathStart" class="btn primary">Start</button>
+                  <button id="threeamBreathPause" class="btn ghost">Pause</button>
+                  <button id="threeamBreathReset" class="btn ghost">Reset</button>
+                </div>
+              </div>
+
+              <div class="subcard scripture-card">
+                <h3>Scripture for the night</h3>
+                <div class="scripture-grid">
+                  <article class="scripture">
+                    <h4>Psalm 91:11</h4>
+                    <p>"For He will command His angels concerning you to guard you in all your ways."</p>
+                  </article>
+                  <article class="scripture">
+                    <h4>Revelation 12:7</h4>
+                    <p>"Now war arose in heaven, Michael and his angels fighting against the dragon."</p>
+                  </article>
+                  <article class="scripture">
+                    <h4>Psalm 23:4</h4>
+                    <p>"Even though I walk through the valley of the shadow of death, I will fear no evil."</p>
+                  </article>
+                  <article class="scripture">
+                    <h4>John 14:27</h4>
+                    <p>"Peace I leave with you; my peace I give to you."</p>
+                  </article>
+                </div>
+              </div>
+
+              <div class="subcard prayer-action">
+                <h3>St. Michael Prayer</h3>
+                <p>Return to the prayer when you need strength.</p>
+                <button id="threeamPrayerBtn" class="btn primary">Open St. Michael prayer</button>
+              </div>
+
+              <div class="subcard journal-card">
+                <h3>Journal one sentence</h3>
+                <label for="journalInput" class="sr-only">Journal entry</label>
+                <textarea
+                  id="journalInput"
+                  rows="4"
+                  placeholder="Lord, tonight I feel..."
+                ></textarea>
+                <div class="control-row">
+                  <button id="journalSave" class="btn primary">Save</button>
+                  <button id="journalClear" class="btn ghost">Clear journal</button>
+                </div>
+                <p id="journalStatus" class="muted" aria-live="polite">Saved only on this device.</p>
+              </div>
+
+              <div class="subcard audio-card">
+                <h3>Calming audio</h3>
+                <p id="audioStatus" class="muted">Optional: add night prayer audio.</p>
+                <div class="control-row">
+                  <button id="audioPlay" class="btn ghost" disabled>Play</button>
+                  <button id="audioPause" class="btn ghost" disabled>Pause</button>
+                  <button id="audioStop" class="btn ghost" disabled>Stop</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="dialogBackdrop" class="dialog-backdrop" hidden></div>
+    <div id="panicDialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="panicTitle" hidden>
+      <div class="dialog-card">
+        <button id="panicCloseBtn" class="icon-btn" aria-label="Close calming panel">×</button>
+        <h2 id="panicTitle">Breathe. You are not alone.</h2>
+        <p id="panicPrayerText" class="panic-prayer"></p>
+        <div class="panic-breath">
+          <p class="breath-phase">60-second breathing timer</p>
+          <p id="panicBreathTimer" class="breath-timer" aria-live="polite">60</p>
+          <div class="control-row">
+            <button id="panicBreathStart" class="btn primary">Start</button>
+            <button id="panicBreathPause" class="btn ghost">Pause</button>
+            <button id="panicBreathReset" class="btn ghost">Reset</button>
+          </div>
+        </div>
+        <button id="panicPrayerBtn" class="btn primary">Start prayer mode</button>
       </div>
-    </header>
+    </div>
 
-    <main id="mainContent">
-      <section class="controls">
-        <div class="prayer-buttons" role="group" aria-label="Prayer selection">
-          <button class="big-btn prayer-btn" data-prayer="prayer">Prayer to St. Michael</button>
-          <button class="big-btn prayer-btn" data-prayer="chaplet">Chaplet of St. Michael</button>
-          <button class="big-btn prayer-btn" data-prayer="litany">Litany</button>
-        </div>
-
-        <button id="panicBtn" class="panic-btn big-btn" aria-live="off">Spiritual Panic Button</button>
-      </section>
-
-      <section class="prayer-panel" aria-label="Prayer content">
-        <div class="line-mode-controls">
-          <button id="lineModeBtn" class="toggle-btn" aria-pressed="false">One line at a time</button>
-          <button id="prevLineBtn" class="big-btn">Previous line</button>
-          <button id="nextLineBtn" class="big-btn">Next line</button>
-        </div>
-
-        <article>
-          <h2 id="prayerTitle">Prayer to St. Michael</h2>
-          <p id="prayerLine" class="prayer-line" aria-live="polite"></p>
-          <div id="allLines" class="all-lines" aria-live="polite"></div>
-        </article>
-      </section>
-
-      <section class="chaplet-tools" aria-label="Chaplet tools">
-        <h2>Bead Counter</h2>
-        <div class="counter-row">
-          <button id="decrementBtn" class="big-btn" aria-label="Decrease bead counter">-</button>
-          <output id="beadCount" aria-live="polite">0</output>
-          <button id="incrementBtn" class="big-btn" aria-label="Increase bead counter">+</button>
-        </div>
-        <button id="resetCounterBtn" class="big-btn">Reset beads</button>
-      </section>
-    </main>
-
-    <audio id="ambience" loop preload="none"></audio>
+    <!-- Add /audio/night-prayer.mp3 to enable calming audio in the 3AM section. -->
+    <audio id="nightAudio" preload="none"></audio>
 
     <div id="srStatus" class="sr-only" aria-live="polite"></div>
     <script src="app.js"></script>

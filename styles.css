@@ -1,10 +1,19 @@
 :root {
-  color-scheme: light dark;
-  --bg: #f8f8f8;
-  --text: #111;
-  --accent: #194c98;
-  --danger: #9d1f25;
-  --panel: #ffffff;
+  color-scheme: dark;
+  --bg: #0b0f17;
+  --surface: #141a24;
+  --surface-soft: #1c2433;
+  --text: #f2f0e6;
+  --muted: #b6b9c9;
+  --accent: #d8b15c;
+  --accent-strong: #f4d28b;
+  --danger: #c14848;
+  --danger-soft: #621824;
+  --outline: #f4d28b;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  --radius-lg: 1.4rem;
+  --radius-md: 1rem;
+  --radius-pill: 999px;
 }
 
 * {
@@ -13,110 +22,437 @@
 
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: "SF Pro Text", "Inter", "Segoe UI", system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
 }
 
-.app-header,
-main {
-  max-width: 960px;
+body.dialog-open {
+  overflow: hidden;
+}
+
+img,
+svg {
+  max-width: 100%;
+  display: block;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 16px;
+  background: var(--accent);
+  color: #1a1206;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.6rem;
+  z-index: 1000;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 16px;
+}
+
+.app-shell {
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem
+    calc(2.5rem + env(safe-area-inset-bottom));
 }
 
-.top-controls,
-.line-mode-controls,
-.counter-row,
-.prayer-buttons {
+.app-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.branding h1 {
+  margin: 0.3rem 0 0.4rem;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  letter-spacing: 0.02em;
+}
+
+.app-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin: 0;
+}
+
+.app-subtitle {
+  margin: 0;
+  color: var(--muted);
+  max-width: 38rem;
+}
+
+.top-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
 }
 
-.prayer-buttons {
-  margin: 0.75rem 0;
+.control-group {
+  display: grid;
+  gap: 0.4rem;
 }
 
-.big-btn {
-  font-size: 1.1rem;
-  min-height: 3.25rem;
-  min-width: 8rem;
-  padding: 0.7rem 1rem;
-  border: 2px solid #0000;
-  border-radius: 0.7rem;
-  cursor: pointer;
+label {
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
-.big-btn:focus-visible,
-.toggle-btn:focus-visible,
-select:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
+select,
+textarea {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: 0.8rem;
+  padding: 0.6rem 0.8rem;
 }
 
-.toggle-btn {
-  min-height: 2.7rem;
-  border-radius: 0.6rem;
-  border: 1px solid #888;
-  padding: 0.5rem 0.8rem;
-  cursor: pointer;
-}
-
-.panic-btn {
-  background: var(--danger);
-  color: #fff;
+textarea {
   width: 100%;
+  resize: vertical;
 }
 
-.prayer-panel,
-.chaplet-tools {
-  background: var(--panel);
+.section-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(11, 15, 23, 0.85);
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  border-radius: var(--radius-pill);
+  padding: 0.4rem;
+  display: grid;
+  gap: 0.4rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+}
+
+.nav-btn {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  padding: 0.55rem 0.8rem;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nav-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.section {
+  margin-top: 2rem;
+}
+
+.section-heading {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+}
+
+.subtitle {
+  color: var(--muted);
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.prayer-card {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.prayer-tabs {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.tab-btn {
+  border: 1px solid transparent;
   border-radius: 0.9rem;
-  padding: 1rem;
-  margin-top: 1rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--surface-soft);
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  background: rgba(216, 177, 92, 0.2);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: var(--accent-strong);
+}
+
+.prayer-controls {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.line-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.line-status {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.prayer-content {
+  display: grid;
+  gap: 1rem;
 }
 
 .prayer-line {
-  font-size: 1.25rem;
-  line-height: 1.5;
+  font-size: clamp(1.3rem, 2.4vw, 1.6rem);
+  margin: 0;
 }
 
 .all-lines p {
-  margin: 0.4rem 0;
+  margin: 0.5rem 0;
+  color: var(--muted);
+}
+
+.all-lines .active-line {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.counter-card {
+  display: grid;
+  gap: 1.2rem;
+  justify-items: center;
+}
+
+.counter-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
 }
 
 output {
-  min-width: 4rem;
+  display: inline-block;
+  min-width: 6rem;
   text-align: center;
-  font-size: 1.6rem;
+  font-size: clamp(2.6rem, 4vw, 3.6rem);
+  font-weight: 700;
+  color: var(--accent-strong);
 }
 
-.focus-mode .app-header,
-.focus-mode .controls,
-.focus-mode .chaplet-tools {
+.counter-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.panic-card {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+}
+
+.panic-intro {
+  margin: 0;
+  color: var(--muted);
+}
+
+.threeam-card {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.step-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.4rem;
+  color: var(--muted);
+}
+
+.threeam-grid {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.subcard {
+  background: var(--surface-soft);
+  border-radius: var(--radius-md);
+  padding: 1.2rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.scripture-grid {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.scripture {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0.9rem;
+  padding: 0.9rem;
+}
+
+.scripture h4 {
+  margin: 0 0 0.4rem;
+  color: var(--accent-strong);
+}
+
+.breathing-visual {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  margin: 0.4rem auto 0;
+  background: radial-gradient(circle, rgba(216, 177, 92, 0.4), transparent 70%);
+  border: 1px solid rgba(216, 177, 92, 0.4);
+  transform: scale(1);
+  transition: transform 1s ease;
+}
+
+.breath-phase {
+  margin: 0;
+  text-align: center;
+  color: var(--muted);
+}
+
+.breath-timer {
+  margin: 0;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--accent-strong);
+}
+
+.late-night {
+  background: rgba(216, 177, 92, 0.15);
+  border: 1px solid rgba(216, 177, 92, 0.35);
+  color: var(--accent-strong);
+  padding: 0.8rem 1rem;
+  border-radius: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.btn,
+.icon-btn {
+  font: inherit;
+  border-radius: 0.9rem;
+  border: 1px solid transparent;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn.primary {
+  background: var(--accent);
+  color: #1a1206;
+  font-weight: 700;
+}
+
+.btn.ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.btn.danger {
+  background: var(--danger);
+  color: #fff;
+  font-weight: 700;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn:hover:not(:disabled),
+.nav-btn:hover,
+.tab-btn:hover {
+  transform: translateY(-1px);
+}
+
+.icon-btn {
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.5rem;
+  padding: 0.3rem 0.5rem;
+  min-height: auto;
+}
+
+.control-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.focus-exit {
   display: none;
 }
 
-.focus-mode .prayer-panel {
-  margin-top: 0;
-  min-height: 100vh;
-  border-radius: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 6, 10, 0.7);
+  z-index: 30;
 }
 
-.warfare-mode {
-  --bg: #090b11;
-  --text: #d9deee;
-  --accent: #9ebfff;
-  --panel: #111827;
+.dialog {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 40;
+  padding: 1.5rem;
 }
 
-.warfare-mode .panic-btn {
-  background: #5f1420;
+.dialog-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 1.8rem;
+  max-width: 480px;
+  width: 100%;
+  display: grid;
+  gap: 1.2rem;
+  box-shadow: var(--shadow);
+}
+
+.panic-prayer {
+  margin: 0;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+  margin: 0;
 }
 
 .sr-only {
@@ -129,4 +465,85 @@ output {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+.btn:focus-visible,
+.nav-btn:focus-visible,
+.tab-btn:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.icon-btn:focus-visible {
+  outline: 3px solid var(--outline);
+  outline-offset: 2px;
+}
+
+.focus-mode .app-header,
+.focus-mode .section-nav,
+.focus-mode #section-beads,
+.focus-mode #section-panic,
+.focus-mode #section-threeam,
+.focus-mode .section-heading,
+.focus-mode .prayer-tabs {
+  display: none;
+}
+
+.focus-mode .prayer-card {
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  min-height: 100vh;
+  padding-top: 2rem;
+}
+
+.focus-mode .prayer-line {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+.focus-mode .focus-exit {
+  display: inline-flex;
+}
+
+.warfare-mode {
+  --bg: #05070d;
+  --surface: #0f1422;
+  --surface-soft: #161c2c;
+  --text: #f1f4ff;
+  --muted: #9fa8c4;
+  --accent: #f0c26a;
+  --accent-strong: #ffe3a8;
+  --danger: #7b1627;
+}
+
+@media (min-width: 768px) {
+  .app-header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .top-controls {
+    justify-content: flex-end;
+  }
+
+  .threeam-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .threeam-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .scripture-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
 }
