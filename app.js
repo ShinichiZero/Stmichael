@@ -171,41 +171,116 @@ const prayers = {
   }
 };
 
+const storage = {
+  get(key, fallback) {
+    try {
+      const value = localStorage.getItem(key);
+      return value ? JSON.parse(value) : fallback;
+    } catch (error) {
+      return fallback;
+    }
+  },
+  set(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+};
+
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const AUDIO_SOURCE = "audio/night-prayer.mp3";
+
+const safeBeads = Math.max(0, storage.get("stmichael.beads", 0));
+
 const state = {
-  language: "en",
-  prayer: "prayer",
-  lineMode: false,
-  lineIndex: 0,
-  beads: 0,
-  focus: false,
-  warfare: false
+  language: storage.get("stmichael.language", "en"),
+  prayer: storage.get("stmichael.prayer", "prayer"),
+  lineMode: storage.get("stmichael.lineMode", false),
+  lineIndex: storage.get("stmichael.lineIndex", 0),
+  beads: safeBeads,
+  focus: storage.get("stmichael.focus", false),
+  warfare: storage.get("stmichael.warfare", false),
+  section: storage.get("stmichael.section", "prayers")
 };
 
 const el = {
   languageSelect: document.getElementById("languageSelect"),
-  prayerButtons: document.querySelectorAll(".prayer-btn"),
+  sectionButtons: document.querySelectorAll(".nav-btn"),
+  sections: document.querySelectorAll(".section"),
+  prayerButtons: document.querySelectorAll(".tab-btn"),
   prayerTitle: document.getElementById("prayerTitle"),
   prayerLine: document.getElementById("prayerLine"),
   allLines: document.getElementById("allLines"),
   lineModeBtn: document.getElementById("lineModeBtn"),
   prevLineBtn: document.getElementById("prevLineBtn"),
   nextLineBtn: document.getElementById("nextLineBtn"),
+  lineStatus: document.getElementById("lineStatus"),
   panicBtn: document.getElementById("panicBtn"),
+  panicDialog: document.getElementById("panicDialog"),
+  dialogBackdrop: document.getElementById("dialogBackdrop"),
+  panicCloseBtn: document.getElementById("panicCloseBtn"),
+  panicPrayerText: document.getElementById("panicPrayerText"),
+  panicBreathTimer: document.getElementById("panicBreathTimer"),
+  panicBreathStart: document.getElementById("panicBreathStart"),
+  panicBreathPause: document.getElementById("panicBreathPause"),
+  panicBreathReset: document.getElementById("panicBreathReset"),
+  panicPrayerBtn: document.getElementById("panicPrayerBtn"),
   incrementBtn: document.getElementById("incrementBtn"),
   decrementBtn: document.getElementById("decrementBtn"),
   resetCounterBtn: document.getElementById("resetCounterBtn"),
   beadCount: document.getElementById("beadCount"),
-  srStatus: document.getElementById("srStatus"),
   focusModeBtn: document.getElementById("focusModeBtn"),
-  warfareModeBtn: document.getElementById("warfareModeBtn")
+  exitFocusBtn: document.getElementById("exitFocusBtn"),
+  warfareModeBtn: document.getElementById("warfareModeBtn"),
+  srStatus: document.getElementById("srStatus"),
+  threeamBreathVisual: document.getElementById("threeamBreathVisual"),
+  threeamBreathPhase: document.getElementById("threeamBreathPhase"),
+  threeamBreathTimer: document.getElementById("threeamBreathTimer"),
+  threeamBreathStart: document.getElementById("threeamBreathStart"),
+  threeamBreathPause: document.getElementById("threeamBreathPause"),
+  threeamBreathReset: document.getElementById("threeamBreathReset"),
+  threeamPrayerBtn: document.getElementById("threeamPrayerBtn"),
+  journalInput: document.getElementById("journalInput"),
+  journalSave: document.getElementById("journalSave"),
+  journalClear: document.getElementById("journalClear"),
+  journalStatus: document.getElementById("journalStatus"),
+  audioPlay: document.getElementById("audioPlay"),
+  audioPause: document.getElementById("audioPause"),
+  audioStop: document.getElementById("audioStop"),
+  audioStatus: document.getElementById("audioStatus"),
+  nightAudio: document.getElementById("nightAudio"),
+  lateNightBanner: document.getElementById("lateNightBanner")
 };
 
+const breathPhases = [
+  { label: "Inhale", duration: 4, scale: 1.15 },
+  { label: "Hold", duration: 4, scale: 1.15 },
+  { label: "Exhale", duration: 6, scale: 0.85 }
+];
+
+const breathState = {
+  running: false,
+  phaseIndex: 0,
+  remaining: 0,
+  intervalId: null
+};
+
+let panicTimerId = null;
+let panicRemaining = 60;
+let lastFocusedElement = null;
+let audioAvailable = false;
+let audioRequested = false;
+
 function getCurrentPrayer() {
-  return prayers[state.language][state.prayer];
+  const languagePack = prayers[state.language] ?? prayers.en;
+  return languagePack[state.prayer] ?? languagePack.prayer;
 }
 
 function announce(message) {
-  el.srStatus.textContent = message;
+  el.srStatus.textContent = message ?? "";
 }
 
 function haptic() {
@@ -214,32 +289,88 @@ function haptic() {
   }
 }
 
+function setSection(section) {
+  state.section = section;
+  storage.set("stmichael.section", section);
+  el.sections.forEach((panel) => {
+    panel.hidden = panel.dataset.section !== section;
+  });
+  el.sectionButtons.forEach((button) => {
+    const isActive = button.dataset.section === section;
+    button.classList.toggle("active", isActive);
+    if (isActive) {
+      button.setAttribute("aria-current", "page");
+    } else {
+      button.removeAttribute("aria-current");
+    }
+  });
+}
+
+function updatePrayerTabs() {
+  el.prayerButtons.forEach((button) => {
+    const isActive = button.dataset.prayer === state.prayer;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    button.tabIndex = isActive ? 0 : -1;
+  });
+}
+
 function renderPrayer() {
   const current = getCurrentPrayer();
   el.prayerTitle.textContent = current.title;
   const safeIndex = Math.max(0, Math.min(state.lineIndex, current.lines.length - 1));
   state.lineIndex = safeIndex;
+  storage.set("stmichael.lineIndex", safeIndex);
   el.prayerLine.textContent = current.lines[safeIndex] ?? "";
   if (state.lineMode) {
     el.allLines.innerHTML = "";
     el.prayerLine.hidden = false;
   } else {
     el.prayerLine.hidden = true;
-    el.allLines.innerHTML = current.lines.map((line) => `<p>${line}</p>`).join("");
+    el.allLines.innerHTML = current.lines
+      .map((line, index) => {
+        const activeClass = index === safeIndex ? "active-line" : "";
+        return `<p class="${activeClass}">${line}</p>`;
+      })
+      .join("");
+  }
+
+  const atStart = safeIndex <= 0;
+  const atEnd = safeIndex >= current.lines.length - 1;
+  const disableLineNav = !state.lineMode;
+  el.prevLineBtn.disabled = disableLineNav || atStart;
+  el.nextLineBtn.disabled = disableLineNav || atEnd;
+
+  if (state.lineMode) {
+    el.lineStatus.textContent = `Line ${safeIndex + 1} of ${current.lines.length}`;
+  } else {
+    el.lineStatus.textContent = `Full prayer • ${current.lines.length} lines`;
   }
 }
 
-function setLineMode(enabled) {
+function setLineMode(enabled, { shouldAnnounce = true } = {}) {
   state.lineMode = enabled;
+  storage.set("stmichael.lineMode", enabled);
   el.lineModeBtn.setAttribute("aria-pressed", String(enabled));
+  el.lineModeBtn.textContent = enabled ? "Show full prayer" : "One line at a time";
   renderPrayer();
-  announce(enabled ? "One line mode enabled" : "One line mode disabled");
+  if (shouldAnnounce) {
+    announce(enabled ? "One line mode enabled" : "Full prayer mode enabled");
+  }
 }
 
 function setFocusMode(enabled) {
   state.focus = enabled;
+  storage.set("stmichael.focus", enabled);
   document.body.classList.toggle("focus-mode", enabled);
   el.focusModeBtn.setAttribute("aria-pressed", String(enabled));
+  el.focusModeBtn.textContent = enabled ? "Exit focus mode" : "Focus mode";
+  if (enabled) {
+    setSection("prayers");
+  }
+  if (enabled && !state.lineMode) {
+    setLineMode(true, { shouldAnnounce: false });
+  }
   announce(enabled ? "Focus mode enabled" : "Focus mode disabled");
 }
 
@@ -251,30 +382,47 @@ function startAmbience() {
   if (audioCtx) {
     return;
   }
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  osc = audioCtx.createOscillator();
-  gain = audioCtx.createGain();
-  osc.type = "sine";
-  osc.frequency.value = 196;
-  gain.gain.value = 0.02;
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    osc = audioCtx.createOscillator();
+    gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = 196;
+    gain.gain.value = 0.02;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume().catch(() => {});
+    }
+  } catch (error) {
+    audioCtx = null;
+  }
 }
 
 function stopAmbience() {
   if (!audioCtx) {
     return;
   }
-  osc.stop();
-  audioCtx.close();
+  if (osc) {
+    try {
+      osc.stop();
+    } catch (error) {
+      console.warn("Failed to stop oscillator", error);
+    }
+  }
+  audioCtx.close().catch(() => {});
   audioCtx = null;
+  osc = null;
+  gain = null;
 }
 
 function setWarfareMode(enabled) {
   state.warfare = enabled;
+  storage.set("stmichael.warfare", enabled);
   document.body.classList.toggle("warfare-mode", enabled);
   el.warfareModeBtn.setAttribute("aria-pressed", String(enabled));
+  el.warfareModeBtn.textContent = enabled ? "Exit warfare mode" : "Spiritual warfare mode";
   if (enabled) {
     setFocusMode(true);
     startAmbience();
@@ -284,65 +432,366 @@ function setWarfareMode(enabled) {
   announce(enabled ? "Spiritual warfare mode enabled" : "Spiritual warfare mode disabled");
 }
 
-el.languageSelect.addEventListener("change", (event) => {
-  state.language = event.target.value;
+function setPrayer(prayerKey) {
+  state.prayer = prayerKey;
+  storage.set("stmichael.prayer", prayerKey);
   state.lineIndex = 0;
   renderPrayer();
+  updatePrayerTabs();
+  announce(getCurrentPrayer().title);
+}
+
+function setLanguage(language) {
+  state.language = language;
+  storage.set("stmichael.language", language);
+  state.lineIndex = 0;
+  renderPrayer();
+  updatePrayerTabs();
+  updatePanicPrayer();
+}
+
+function updateBeads(value) {
+  state.beads = Math.max(0, value);
+  el.beadCount.textContent = String(state.beads);
+  storage.set("stmichael.beads", state.beads);
+}
+
+function updatePanicPrayer() {
+  el.panicPrayerText.textContent = prayers[state.language].panic;
+}
+
+function openPanicDialog() {
+  lastFocusedElement = document.activeElement;
+  document.body.classList.add("dialog-open");
+  updatePanicPrayer();
+  el.dialogBackdrop.hidden = false;
+  el.panicDialog.hidden = false;
+  el.panicCloseBtn.focus();
+  resetPanicTimer();
+  announce("Calming panel opened");
+}
+
+function closePanicDialog() {
+  document.body.classList.remove("dialog-open");
+  el.dialogBackdrop.hidden = true;
+  el.panicDialog.hidden = true;
+  pausePanicTimer();
+  if (lastFocusedElement) {
+    lastFocusedElement.focus();
+  }
+  announce("Calming panel closed");
+}
+
+function updatePanicTimerDisplay() {
+  el.panicBreathTimer.textContent = String(panicRemaining);
+}
+
+function startPanicTimer() {
+  if (panicTimerId) {
+    return;
+  }
+  if (panicRemaining <= 0) {
+    panicRemaining = 60;
+  }
+  panicTimerId = window.setInterval(() => {
+    panicRemaining -= 1;
+    if (panicRemaining <= 0) {
+      panicRemaining = 0;
+      pausePanicTimer();
+      announce("Breathing timer complete");
+    }
+    updatePanicTimerDisplay();
+  }, 1000);
+}
+
+function pausePanicTimer() {
+  if (panicTimerId) {
+    window.clearInterval(panicTimerId);
+    panicTimerId = null;
+  }
+}
+
+function resetPanicTimer() {
+  panicRemaining = 60;
+  updatePanicTimerDisplay();
+}
+
+function updateBreathVisual(phase) {
+  if (prefersReducedMotion) {
+    el.threeamBreathVisual.style.transform = "scale(1)";
+    return;
+  }
+  el.threeamBreathVisual.style.transitionDuration = `${phase.duration}s`;
+  el.threeamBreathVisual.style.transform = `scale(${phase.scale})`;
+}
+
+function updateThreeAmBreathUI() {
+  if (!breathState.running && breathState.remaining === 0) {
+    el.threeamBreathPhase.textContent = "Ready";
+    el.threeamBreathTimer.textContent = "0";
+    el.threeamBreathVisual.style.transform = "scale(1)";
+    return;
+  }
+  const phase = breathPhases[breathState.phaseIndex];
+  el.threeamBreathPhase.textContent = breathState.running ? phase.label : "Paused";
+  el.threeamBreathTimer.textContent = String(breathState.remaining);
+}
+
+function tickThreeAmBreath() {
+  breathState.remaining -= 1;
+  if (breathState.remaining <= 0) {
+    breathState.phaseIndex = (breathState.phaseIndex + 1) % breathPhases.length;
+    const phase = breathPhases[breathState.phaseIndex];
+    breathState.remaining = phase.duration;
+    updateBreathVisual(phase);
+  }
+  updateThreeAmBreathUI();
+}
+
+function startThreeAmBreath() {
+  if (breathState.running) {
+    return;
+  }
+  if (breathState.remaining === 0) {
+    breathState.phaseIndex = 0;
+    breathState.remaining = breathPhases[0].duration;
+    updateBreathVisual(breathPhases[0]);
+  }
+  breathState.running = true;
+  breathState.intervalId = window.setInterval(tickThreeAmBreath, 1000);
+  updateThreeAmBreathUI();
+}
+
+function pauseThreeAmBreath() {
+  if (breathState.intervalId) {
+    window.clearInterval(breathState.intervalId);
+    breathState.intervalId = null;
+  }
+  breathState.running = false;
+  updateThreeAmBreathUI();
+}
+
+function resetThreeAmBreath() {
+  pauseThreeAmBreath();
+  breathState.phaseIndex = 0;
+  breathState.remaining = 0;
+  updateThreeAmBreathUI();
+}
+
+function saveJournalEntry() {
+  const entry = el.journalInput.value.trim();
+  storage.set("stmichael.journal", entry);
+  el.journalStatus.textContent = entry ? "Saved only on this device." : "Journal cleared.";
+  announce("Journal saved");
+}
+
+function clearJournalEntry() {
+  el.journalInput.value = "";
+  storage.set("stmichael.journal", "");
+  el.journalStatus.textContent = "Journal cleared.";
+  announce("Journal cleared");
+}
+
+function initJournal() {
+  const saved = storage.get("stmichael.journal", "");
+  el.journalInput.value = saved;
+  el.journalStatus.textContent = "Saved only on this device.";
+}
+
+function setAudioAvailability(available) {
+  audioAvailable = available;
+  el.audioPlay.disabled = !available;
+  el.audioPause.disabled = !available;
+  el.audioStop.disabled = !available;
+  el.audioStatus.textContent = available
+    ? "Audio ready. Use play to begin."
+    : "Add /audio/night-prayer.mp3 to enable audio.";
+}
+
+function initAudio() {
+  if (audioRequested) {
+    return;
+  }
+  audioRequested = true;
+  fetch(AUDIO_SOURCE, { method: "HEAD" })
+    .then((response) => {
+      if (!response.ok) {
+        setAudioAvailability(false);
+        return;
+      }
+      el.nightAudio.src = AUDIO_SOURCE;
+      el.nightAudio.loop = true;
+      setAudioAvailability(true);
+    })
+    .catch(() => {
+      setAudioAvailability(false);
+    });
+}
+
+function handleAudioPlay() {
+  if (!audioAvailable) {
+    return;
+  }
+  el.nightAudio.play().then(() => {
+    el.audioStatus.textContent = "Playing audio.";
+    announce("Playing audio");
+  }).catch(() => {
+    el.audioStatus.textContent = "Unable to play audio.";
+    announce("Unable to play audio");
+  });
+}
+
+function handleAudioPause() {
+  if (!audioAvailable) {
+    return;
+  }
+  el.nightAudio.pause();
+  el.audioStatus.textContent = "Audio paused.";
+  announce("Audio paused");
+}
+
+function handleAudioStop() {
+  if (!audioAvailable) {
+    return;
+  }
+  el.nightAudio.pause();
+  el.nightAudio.currentTime = 0;
+  el.audioStatus.textContent = "Audio stopped.";
+  announce("Audio stopped");
+}
+
+function updateLateNightBanner() {
+  const hour = new Date().getHours();
+  const isLate = hour < 4;
+  el.lateNightBanner.hidden = !isLate;
+}
+
+function applyInitialState() {
+  el.languageSelect.value = state.language;
+  updateBeads(state.beads);
+  const validSections = Array.from(el.sections).map((section) => section.dataset.section);
+  if (!validSections.includes(state.section)) {
+    state.section = "prayers";
+  }
+  setSection(state.section);
+  updatePrayerTabs();
+  setLineMode(state.lineMode, { shouldAnnounce: false });
+  setFocusMode(state.focus);
+  setWarfareMode(state.warfare);
+  renderPrayer();
+  updatePanicPrayer();
+  initJournal();
+  updateLateNightBanner();
+  initAudio();
+}
+
+el.languageSelect.addEventListener("change", (event) => {
+  setLanguage(event.target.value);
   announce(`Language changed to ${event.target.selectedOptions[0].textContent}`);
 });
 
-el.prayerButtons.forEach((button) => {
+el.sectionButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    state.prayer = button.dataset.prayer;
-    state.lineIndex = 0;
-    renderPrayer();
-    announce(el.prayerTitle.textContent);
+    setSection(button.dataset.section);
+    announce(`${button.textContent} section`);
   });
+});
+
+el.prayerButtons.forEach((button) => {
+  button.addEventListener("click", () => setPrayer(button.dataset.prayer));
 });
 
 el.lineModeBtn.addEventListener("click", () => setLineMode(!state.lineMode));
 
 el.prevLineBtn.addEventListener("click", () => {
-  state.lineIndex -= 1;
+  if (!state.lineMode) {
+    return;
+  }
+  state.lineIndex = Math.max(0, state.lineIndex - 1);
   renderPrayer();
 });
 
 el.nextLineBtn.addEventListener("click", () => {
-  state.lineIndex += 1;
+  if (!state.lineMode) {
+    return;
+  }
+  const current = getCurrentPrayer();
+  state.lineIndex = Math.min(current.lines.length - 1, state.lineIndex + 1);
   renderPrayer();
 });
 
 el.panicBtn.addEventListener("click", () => {
-  const panicLine = prayers[state.language].panic;
-  el.prayerTitle.textContent = "Emergency Prayer";
-  el.prayerLine.hidden = false;
-  el.prayerLine.textContent = panicLine;
-  el.allLines.innerHTML = "";
+  openPanicDialog();
   haptic();
-  announce("Emergency prayer activated");
+});
+
+el.dialogBackdrop.addEventListener("click", closePanicDialog);
+el.panicCloseBtn.addEventListener("click", closePanicDialog);
+
+el.panicBreathStart.addEventListener("click", () => {
+  startPanicTimer();
+  haptic();
+});
+
+el.panicBreathPause.addEventListener("click", pausePanicTimer);
+el.panicBreathReset.addEventListener("click", resetPanicTimer);
+
+el.panicPrayerBtn.addEventListener("click", () => {
+  setSection("prayers");
+  setPrayer("prayer");
+  setFocusMode(true);
+  setLineMode(true, { shouldAnnounce: false });
+  closePanicDialog();
 });
 
 el.incrementBtn.addEventListener("click", () => {
-  state.beads += 1;
-  el.beadCount.textContent = String(state.beads);
+  updateBeads(state.beads + 1);
   haptic();
 });
 
 el.decrementBtn.addEventListener("click", () => {
-  state.beads = Math.max(0, state.beads - 1);
-  el.beadCount.textContent = String(state.beads);
+  updateBeads(state.beads - 1);
   haptic();
 });
 
 el.resetCounterBtn.addEventListener("click", () => {
-  state.beads = 0;
-  el.beadCount.textContent = "0";
+  updateBeads(0);
   haptic();
   announce("Bead counter reset");
 });
 
 el.focusModeBtn.addEventListener("click", () => setFocusMode(!state.focus));
+el.exitFocusBtn.addEventListener("click", () => setFocusMode(false));
 el.warfareModeBtn.addEventListener("click", () => setWarfareMode(!state.warfare));
+
+el.threeamBreathStart.addEventListener("click", () => {
+  startThreeAmBreath();
+  haptic();
+});
+
+el.threeamBreathPause.addEventListener("click", pauseThreeAmBreath);
+el.threeamBreathReset.addEventListener("click", resetThreeAmBreath);
+
+el.threeamPrayerBtn.addEventListener("click", () => {
+  setSection("prayers");
+  setPrayer("prayer");
+});
+
+el.journalSave.addEventListener("click", saveJournalEntry);
+el.journalClear.addEventListener("click", clearJournalEntry);
+el.journalInput.addEventListener("input", () => {
+  storage.set("stmichael.journal", el.journalInput.value.trim());
+});
+
+el.audioPlay.addEventListener("click", handleAudioPlay);
+el.audioPause.addEventListener("click", handleAudioPause);
+el.audioStop.addEventListener("click", handleAudioStop);
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !el.panicDialog.hidden) {
+    closePanicDialog();
+  }
+});
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -352,4 +801,4 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-renderPrayer();
+applyInitialState();

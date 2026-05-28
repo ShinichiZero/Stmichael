@@ -1,5 +1,13 @@
-const CACHE_NAME = "stmichael-cache-v1";
-const OFFLINE_ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest"];
+const CACHE_NAME = "stmichael-cache-v2";
+const OFFLINE_ASSETS = [
+  "./",
+  "./index.html",
+  "./styles.css",
+  "./app.js",
+  "./manifest.webmanifest",
+  "./icons/icon-192.svg",
+  "./icons/icon-512.svg"
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
