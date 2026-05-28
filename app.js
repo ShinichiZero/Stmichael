@@ -458,8 +458,9 @@ function setLanguage(language) {
 function updateBeads(value) {
   state.beads = Math.max(0, value);
   el.beadCount.textContent = String(state.beads);
-  el.decrementBtn.disabled = state.beads <= 0;
-  el.decrementBtn.setAttribute("aria-disabled", String(state.beads <= 0));
+  const isDecrementDisabled = state.beads <= 0;
+  el.decrementBtn.disabled = isDecrementDisabled;
+  el.decrementBtn.setAttribute("aria-disabled", String(isDecrementDisabled));
   storage.set("stmichael.beads", state.beads);
 }
 
@@ -513,7 +514,7 @@ function closePanicModal() {
   pausePanicTimer();
   setPanicDialogState(false);
   unlockBodyScroll();
-  if (lastFocusedElement && document.contains(lastFocusedElement)) {
+  if (lastFocusedElement && document.body.contains(lastFocusedElement)) {
     lastFocusedElement.focus({ preventScroll: true });
   }
   lastFocusedElement = null;
