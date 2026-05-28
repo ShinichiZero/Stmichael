@@ -125,7 +125,7 @@ textarea {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(11, 15, 23, 0.85);
+  background: var(--bg);
   border-radius: var(--radius-pill);
   padding: 0.4rem;
   display: grid;

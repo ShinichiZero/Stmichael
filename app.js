@@ -193,8 +193,7 @@ const storage = {
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const AUDIO_SOURCE = "audio/night-prayer.mp3";
 
-const storedBeads = Number(storage.get("stmichael.beads", 0));
-const safeBeads = Number.isFinite(storedBeads) ? Math.max(0, storedBeads) : 0;
+const safeBeads = Math.max(0, Number(storage.get("stmichael.beads", 0)) || 0);
 
 const state = {
   language: storage.get("stmichael.language", "en"),
@@ -276,14 +275,12 @@ let audioAvailable = false;
 let audioRequested = false;
 
 function getCurrentPrayer() {
-  return prayers[state.language][state.prayer] ?? prayers[state.language].prayer;
+  const languagePack = prayers[state.language] ?? prayers.en;
+  return languagePack[state.prayer] ?? languagePack.prayer;
 }
 
 function announce(message) {
-  if (!message) {
-    return;
-  }
-  el.srStatus.textContent = message;
+  el.srStatus.textContent = message ?? "";
 }
 
 function haptic() {
