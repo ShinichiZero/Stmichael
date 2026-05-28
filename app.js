@@ -477,7 +477,7 @@ function setPanicDialogState(isOpen) {
 }
 
 function lockBodyScroll() {
-  scrollLockY = window.scrollY || window.pageYOffset;
+  scrollLockY = window.scrollY;
   document.body.style.top = `-${scrollLockY}px`;
   document.body.classList.add("dialog-open");
 }
