@@ -459,6 +459,7 @@ function updateBeads(value) {
   state.beads = Math.max(0, value);
   el.beadCount.textContent = String(state.beads);
   el.decrementBtn.disabled = state.beads <= 0;
+  el.decrementBtn.setAttribute("aria-disabled", String(state.beads <= 0));
   storage.set("stmichael.beads", state.beads);
 }
 
