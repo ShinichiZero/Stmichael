@@ -460,7 +460,6 @@ function updateBeads(value) {
   el.beadCount.textContent = String(state.beads);
   const isDecrementDisabled = state.beads <= 0;
   el.decrementBtn.disabled = isDecrementDisabled;
-  el.decrementBtn.setAttribute("aria-disabled", String(isDecrementDisabled));
   storage.set("stmichael.beads", state.beads);
 }
 
@@ -494,9 +493,8 @@ function openPanicModal() {
   if (state.panicOpen) {
     return;
   }
-  lastFocusedElement = document.activeElement instanceof HTMLElement
-    ? document.activeElement
-    : null;
+  const activeElement = document.activeElement;
+  lastFocusedElement = activeElement instanceof HTMLElement ? activeElement : null;
   updatePanicPrayer();
   setPanicDialogState(true);
   lockBodyScroll();
