@@ -183,10 +183,10 @@ const storage = {
   set(key, value) {
     try {
       localStorage.setItem(key, JSON.stringify(value));
+      return true;
     } catch (error) {
-      return null;
+      return false;
     }
-    return null;
   }
 };
 
@@ -403,9 +403,16 @@ function stopAmbience() {
   if (!audioCtx) {
     return;
   }
-  osc?.stop();
+  if (osc) {
+    try {
+      osc.stop();
+    } catch (error) {
+    }
+  }
   audioCtx.close().catch(() => {});
   audioCtx = null;
+  osc = null;
+  gain = null;
 }
 
 function setWarfareMode(enabled) {
@@ -586,7 +593,7 @@ function clearJournalEntry() {
 function initJournal() {
   const saved = storage.get("stmichael.journal", "");
   el.journalInput.value = saved;
-  el.journalStatus.textContent = saved ? "Saved only on this device." : "Saved only on this device.";
+  el.journalStatus.textContent = "Saved only on this device.";
 }
 
 function setAudioAvailability(available) {
