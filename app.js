@@ -193,7 +193,7 @@ const storage = {
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const AUDIO_SOURCE = "audio/night-prayer.mp3";
 
-const safeBeads = Math.max(0, Number(storage.get("stmichael.beads", 0)) || 0);
+const safeBeads = Math.max(0, storage.get("stmichael.beads", 0));
 
 const state = {
   language: storage.get("stmichael.language", "en"),
@@ -408,6 +408,7 @@ function stopAmbience() {
     try {
       osc.stop();
     } catch (error) {
+      console.warn("Failed to stop oscillator", error);
     }
   }
   audioCtx.close().catch(() => {});
@@ -661,7 +662,7 @@ function handleAudioStop() {
 
 function updateLateNightBanner() {
   const hour = new Date().getHours();
-  const isLate = hour >= 0 && hour < 4;
+  const isLate = hour < 4;
   el.lateNightBanner.hidden = !isLate;
 }
 

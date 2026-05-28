@@ -7,6 +7,8 @@
   --muted: #b6b9c9;
   --accent: #d8b15c;
   --accent-strong: #f4d28b;
+  --accent-soft: rgba(216, 177, 92, 0.15);
+  --accent-border: rgba(216, 177, 92, 0.35);
   --danger: #c14848;
   --danger-soft: #621824;
   --outline: #f4d28b;
@@ -354,8 +356,8 @@ output {
 }
 
 .late-night {
-  background: rgba(216, 177, 92, 0.15);
-  border: 1px solid rgba(216, 177, 92, 0.35);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
   color: var(--accent-strong);
   padding: 0.8rem 1rem;
   border-radius: 0.9rem;
@@ -516,6 +518,8 @@ textarea:focus-visible,
   --muted: #9fa8c4;
   --accent: #f0c26a;
   --accent-strong: #ffe3a8;
+  --accent-soft: rgba(240, 194, 106, 0.15);
+  --accent-border: rgba(240, 194, 106, 0.35);
   --danger: #7b1627;
 }
 
