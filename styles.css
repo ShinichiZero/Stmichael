@@ -126,7 +126,6 @@ textarea {
   top: 0;
   z-index: 20;
   background: rgba(11, 15, 23, 0.85);
-  background: color-mix(in srgb, var(--bg) 85%, transparent);
   border-radius: var(--radius-pill);
   padding: 0.4rem;
   display: grid;
@@ -134,6 +133,12 @@ textarea {
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(12px);
+}
+
+@supports (background: color-mix(in srgb, white 50%, transparent)) {
+  .section-nav {
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+  }
 }
 
 .nav-btn {

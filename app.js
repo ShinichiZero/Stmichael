@@ -191,13 +191,17 @@ const storage = {
 };
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const AUDIO_SOURCE = "audio/night-prayer.mp3";
+
+const storedBeads = Number(storage.get("stmichael.beads", 0));
+const safeBeads = Number.isFinite(storedBeads) ? Math.max(0, storedBeads) : 0;
 
 const state = {
   language: storage.get("stmichael.language", "en"),
   prayer: storage.get("stmichael.prayer", "prayer"),
   lineMode: storage.get("stmichael.lineMode", false),
   lineIndex: storage.get("stmichael.lineIndex", 0),
-  beads: Math.max(0, storage.get("stmichael.beads", 0)),
+  beads: safeBeads,
   focus: storage.get("stmichael.focus", false),
   warfare: storage.get("stmichael.warfare", false),
   section: storage.get("stmichael.section", "prayers")
@@ -611,14 +615,13 @@ function initAudio() {
     return;
   }
   audioRequested = true;
-  const source = "audio/night-prayer.mp3";
-  fetch(source, { method: "HEAD" })
+  fetch(AUDIO_SOURCE, { method: "HEAD" })
     .then((response) => {
       if (!response.ok) {
         setAudioAvailability(false);
         return;
       }
-      el.nightAudio.src = source;
+      el.nightAudio.src = AUDIO_SOURCE;
       el.nightAudio.loop = true;
       setAudioAvailability(true);
     })
