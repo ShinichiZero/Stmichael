@@ -33,16 +33,16 @@
               <option value="ja">Japanese</option>
             </select>
           </div>
-          <button id="focusModeBtn" class="btn ghost" aria-pressed="false">Focus mode</button>
-          <button id="warfareModeBtn" class="btn ghost" aria-pressed="false">Spiritual warfare mode</button>
+          <button id="focusModeBtn" class="btn ghost" type="button" aria-pressed="false">Focus mode</button>
+          <button id="warfareModeBtn" class="btn ghost" type="button" aria-pressed="false">Spiritual warfare mode</button>
         </div>
       </header>
 
       <nav class="section-nav" aria-label="Primary">
-        <button class="nav-btn active" data-section="prayers" aria-current="page">Prayers</button>
-        <button class="nav-btn" data-section="beads">Beads</button>
-        <button class="nav-btn" data-section="panic">Panic</button>
-        <button class="nav-btn" data-section="threeam">Pray With Me at 3AM</button>
+        <button class="nav-btn active" type="button" data-section="prayers" aria-current="page">Prayers</button>
+        <button class="nav-btn" type="button" data-section="beads">Beads</button>
+        <button class="nav-btn" type="button" data-section="panic">Panic</button>
+        <button class="nav-btn" type="button" data-section="threeam">Pray With Me at 3AM</button>
       </nav>
 
       <main id="mainContent">
@@ -53,18 +53,18 @@
           </div>
           <div class="card prayer-card">
             <div class="prayer-tabs" role="tablist" aria-label="Prayer selection">
-              <button class="tab-btn active" role="tab" data-prayer="prayer" aria-selected="true">Prayer to St. Michael</button>
-              <button class="tab-btn" role="tab" data-prayer="chaplet" aria-selected="false">Chaplet of St. Michael</button>
-              <button class="tab-btn" role="tab" data-prayer="litany" aria-selected="false">Litany</button>
+              <button class="tab-btn active" type="button" role="tab" data-prayer="prayer" aria-selected="true">Prayer to St. Michael</button>
+              <button class="tab-btn" type="button" role="tab" data-prayer="chaplet" aria-selected="false">Chaplet of St. Michael</button>
+              <button class="tab-btn" type="button" role="tab" data-prayer="litany" aria-selected="false">Litany</button>
             </div>
 
             <div class="prayer-controls">
-              <button id="lineModeBtn" class="btn ghost" aria-pressed="false">One line at a time</button>
+              <button id="lineModeBtn" class="btn ghost" type="button" aria-pressed="false">One line at a time</button>
               <div class="line-nav" aria-label="Line navigation">
-                <button id="prevLineBtn" class="btn ghost">Previous</button>
-                <button id="nextLineBtn" class="btn primary">Next</button>
+                <button id="prevLineBtn" class="btn ghost" type="button">Previous</button>
+                <button id="nextLineBtn" class="btn primary" type="button">Next</button>
               </div>
-              <button id="exitFocusBtn" class="btn ghost focus-exit">Exit focus mode</button>
+              <button id="exitFocusBtn" class="btn ghost focus-exit" type="button">Exit focus mode</button>
               <p id="lineStatus" class="line-status" aria-live="polite"></p>
             </div>
 
@@ -83,12 +83,12 @@
           </div>
           <div class="card counter-card">
             <div class="counter-row">
-              <button id="decrementBtn" class="btn ghost" aria-label="Decrease bead counter">−</button>
+              <button id="decrementBtn" class="btn ghost" type="button" aria-label="Decrease bead counter">−</button>
               <output id="beadCount" aria-live="polite">0</output>
-              <button id="incrementBtn" class="btn ghost" aria-label="Increase bead counter">+</button>
+              <button id="incrementBtn" class="btn ghost" type="button" aria-label="Increase bead counter">+</button>
             </div>
             <div class="counter-actions">
-              <button id="resetCounterBtn" class="btn ghost">Reset beads</button>
+              <button id="resetCounterBtn" class="btn ghost" type="button">Reset beads</button>
             </div>
           </div>
         </section>
@@ -100,7 +100,7 @@
           </div>
           <div class="card panic-card">
             <p class="panic-intro">Tap for a steady prayer, breath timer, and focus mode entry.</p>
-            <button id="panicBtn" class="btn danger" aria-haspopup="dialog">Open calming panel</button>
+            <button id="panicBtn" class="btn danger" type="button" aria-haspopup="dialog">Open calming panel</button>
           </div>
         </section>
 
@@ -128,9 +128,9 @@
                 <p id="threeamBreathPhase" class="breath-phase" aria-live="polite">Ready</p>
                 <p id="threeamBreathTimer" class="breath-timer" aria-live="polite">0</p>
                 <div class="control-row">
-                  <button id="threeamBreathStart" class="btn primary">Start</button>
-                  <button id="threeamBreathPause" class="btn ghost">Pause</button>
-                  <button id="threeamBreathReset" class="btn ghost">Reset</button>
+                  <button id="threeamBreathStart" class="btn primary" type="button">Start</button>
+                  <button id="threeamBreathPause" class="btn ghost" type="button">Pause</button>
+                  <button id="threeamBreathReset" class="btn ghost" type="button">Reset</button>
                 </div>
               </div>
 
@@ -159,7 +159,7 @@
               <div class="subcard prayer-action">
                 <h3>St. Michael Prayer</h3>
                 <p>Return to the prayer when you need strength.</p>
-                <button id="threeamPrayerBtn" class="btn primary">Open St. Michael prayer</button>
+                <button id="threeamPrayerBtn" class="btn primary" type="button">Open St. Michael prayer</button>
               </div>
 
               <div class="subcard journal-card">
@@ -171,8 +171,8 @@
                   placeholder="Lord, tonight I feel..."
                 ></textarea>
                 <div class="control-row">
-                  <button id="journalSave" class="btn primary">Save</button>
-                  <button id="journalClear" class="btn ghost">Clear journal</button>
+                  <button id="journalSave" class="btn primary" type="button">Save</button>
+                  <button id="journalClear" class="btn ghost" type="button">Clear journal</button>
                 </div>
                 <p id="journalStatus" class="muted" aria-live="polite">Saved only on this device.</p>
               </div>
@@ -181,9 +181,9 @@
                 <h3>Calming audio</h3>
                 <p id="audioStatus" class="muted">Optional: add night prayer audio.</p>
                 <div class="control-row">
-                  <button id="audioPlay" class="btn ghost" disabled>Play</button>
-                  <button id="audioPause" class="btn ghost" disabled>Pause</button>
-                  <button id="audioStop" class="btn ghost" disabled>Stop</button>
+                  <button id="audioPlay" class="btn ghost" type="button" disabled>Play</button>
+                  <button id="audioPause" class="btn ghost" type="button" disabled>Pause</button>
+                  <button id="audioStop" class="btn ghost" type="button" disabled>Stop</button>
                 </div>
               </div>
             </div>
@@ -193,7 +193,7 @@
     </div>
 
     <div id="dialogBackdrop" class="dialog-backdrop" hidden></div>
-    <div id="panicDialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="panicTitle" hidden>
+    <div id="panicDialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="panicTitle" aria-describedby="panicPrayerText" hidden>
       <div class="dialog-card">
         <button id="panicCloseBtn" class="icon-btn" type="button" aria-label="Close calming panel">×</button>
         <h2 id="panicTitle">Breathe. You are not alone.</h2>
@@ -202,12 +202,12 @@
           <p class="breath-phase">60-second breathing timer</p>
           <p id="panicBreathTimer" class="breath-timer" aria-live="polite">60</p>
           <div class="control-row">
-            <button id="panicBreathStart" class="btn primary">Start</button>
-            <button id="panicBreathPause" class="btn ghost">Pause</button>
-            <button id="panicBreathReset" class="btn ghost">Reset</button>
+            <button id="panicBreathStart" class="btn primary" type="button">Start</button>
+            <button id="panicBreathPause" class="btn ghost" type="button">Pause</button>
+            <button id="panicBreathReset" class="btn ghost" type="button">Reset</button>
           </div>
         </div>
-        <button id="panicPrayerBtn" class="btn primary">Start prayer mode</button>
+        <button id="panicPrayerBtn" class="btn primary" type="button">Start prayer mode</button>
       </div>
     </div>
 
