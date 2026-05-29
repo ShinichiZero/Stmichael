@@ -462,8 +462,7 @@ function setLanguage(language) {
 function updateBeads(value) {
   state.beads = Math.max(0, value);
   el.beadCount.textContent = String(state.beads);
-  const isDecrementDisabled = state.beads <= 0;
-  el.decrementBtn.disabled = isDecrementDisabled;
+  el.decrementBtn.disabled = state.beads <= 0;
   storage.set("stmichael.beads", state.beads);
 }
 
@@ -666,12 +665,20 @@ function initJournal() {
 
 function setAudioAvailability(available) {
   audioAvailable = available;
-  el.audioPlay.disabled = false;
+  el.audioPlay.disabled = !available;
   el.audioPause.disabled = !available;
   el.audioStop.disabled = !available;
   el.audioStatus.textContent = available
     ? "Audio ready. Use play to begin."
     : "Optional audio unavailable. Add /audio/night-prayer.mp3 to enable it.";
+}
+
+function setAudioIdle(message) {
+  audioAvailable = false;
+  el.audioPlay.disabled = false;
+  el.audioPause.disabled = true;
+  el.audioStop.disabled = true;
+  el.audioStatus.textContent = message;
 }
 
 function initAudio() {
@@ -680,10 +687,7 @@ function initAudio() {
   }
   audioInitialized = true;
   el.nightAudio.loop = true;
-  el.audioPlay.disabled = false;
-  el.audioPause.disabled = true;
-  el.audioStop.disabled = true;
-  el.audioStatus.textContent = "Optional: add /audio/night-prayer.mp3 to enable audio.";
+  setAudioIdle("Optional: add /audio/night-prayer.mp3 to enable audio.");
 }
 
 function handleAudioPlay() {
@@ -695,8 +699,7 @@ function handleAudioPlay() {
     el.audioStatus.textContent = "Playing audio.";
     announce("Playing audio");
   }).catch(() => {
-    setAudioAvailability(false);
-    el.audioStatus.textContent = "Unable to play audio.";
+    setAudioIdle("Unable to play audio. Add /audio/night-prayer.mp3 to enable it.");
     announce("Unable to play audio");
   });
 }
@@ -808,7 +811,6 @@ el.panicBreathPause.addEventListener("click", pausePanicTimer);
 el.panicBreathReset.addEventListener("click", resetPanicTimer);
 
 el.panicPrayerBtn.addEventListener("click", () => {
-  closePanicModal({ restoreFocus: false });
   setSection("prayers");
   setPrayer("prayer");
   setFocusMode(true);
