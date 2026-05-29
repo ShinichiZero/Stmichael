@@ -274,7 +274,7 @@ let panicTimerId = null;
 let panicRemaining = 60;
 let lastFocusedElement = null;
 let audioAvailable = false;
-let audioRequested = false;
+let audioInitialized = false;
 let scrollLockY = 0;
 
 function getCurrentPrayer() {
@@ -666,42 +666,36 @@ function initJournal() {
 
 function setAudioAvailability(available) {
   audioAvailable = available;
-  el.audioPlay.disabled = !available;
+  el.audioPlay.disabled = false;
   el.audioPause.disabled = !available;
   el.audioStop.disabled = !available;
   el.audioStatus.textContent = available
     ? "Audio ready. Use play to begin."
-    : "Add /audio/night-prayer.mp3 to enable audio.";
+    : "Optional audio unavailable. Add /audio/night-prayer.mp3 to enable it.";
 }
 
 function initAudio() {
-  if (audioRequested) {
+  if (audioInitialized) {
     return;
   }
-  audioRequested = true;
-  fetch(AUDIO_SOURCE, { method: "HEAD" })
-    .then((response) => {
-      if (!response.ok) {
-        setAudioAvailability(false);
-        return;
-      }
-      el.nightAudio.src = AUDIO_SOURCE;
-      el.nightAudio.loop = true;
-      setAudioAvailability(true);
-    })
-    .catch(() => {
-      setAudioAvailability(false);
-    });
+  audioInitialized = true;
+  el.nightAudio.loop = true;
+  el.audioPlay.disabled = false;
+  el.audioPause.disabled = true;
+  el.audioStop.disabled = true;
+  el.audioStatus.textContent = "Optional: add /audio/night-prayer.mp3 to enable audio.";
 }
 
 function handleAudioPlay() {
-  if (!audioAvailable) {
-    return;
+  if (!el.nightAudio.src) {
+    el.nightAudio.src = AUDIO_SOURCE;
   }
   el.nightAudio.play().then(() => {
+    setAudioAvailability(true);
     el.audioStatus.textContent = "Playing audio.";
     announce("Playing audio");
   }).catch(() => {
+    setAudioAvailability(false);
     el.audioStatus.textContent = "Unable to play audio.";
     announce("Unable to play audio");
   });
