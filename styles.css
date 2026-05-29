@@ -33,6 +33,9 @@ body {
 
 body.dialog-open {
   overflow: hidden;
+  position: fixed;
+  left: 0;
+  right: 0;
 }
 
 img,
@@ -151,6 +154,8 @@ textarea {
   border-radius: var(--radius-pill);
   font-weight: 600;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .nav-btn.active {
@@ -204,6 +209,8 @@ textarea {
   color: var(--text);
   font-weight: 600;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .tab-btn.active {
@@ -374,6 +381,8 @@ output {
   min-height: 44px;
   min-width: 44px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn.primary {
@@ -429,7 +438,7 @@ output {
   position: fixed;
   inset: 0;
   background: rgba(5, 6, 10, 0.7);
-  z-index: 30;
+  z-index: 900;
 }
 
 .dialog {
@@ -437,8 +446,13 @@ output {
   inset: 0;
   display: grid;
   place-items: center;
-  z-index: 40;
+  z-index: 1000;
   padding: 1.5rem;
+}
+
+.dialog[hidden],
+.dialog-backdrop[hidden] {
+  display: none;
 }
 
 .dialog-card {
